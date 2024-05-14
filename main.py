@@ -1,8 +1,62 @@
 import sqlite3
+import tkinter
+from tkinter import ttk
 
 # sqlite database
 sqlConnection = sqlite3.connect("sqlDatabase.db")
 sqlCursor = sqlConnection.cursor()
+
+
+# GUI
+def ownerSelectButtonFunc():
+    selectedOperation = ownerSelectCombobox.get()
+    if selectedOperation == "Add":
+        pass
+    elif selectedOperation == "Edit":
+        pass
+    elif selectedOperation == "Delete":
+        ownerDeleteLabel = tkinter.Label(window, text="Select a owner to delete:   ")
+        ownerDeleteLabel.grid(row=2, column=0)
+
+        sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
+        ownerFullNames = list()
+        for name, surname in sqlCursor:
+            ownerFullNames.append(name + " " + surname)
+
+        ownerDeleteCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerDeleteCombobox.grid(row=2, column=1)
+
+        def ownerDeleteButtonFunc():
+            selectedOwner = ownerDeleteCombobox.get()
+            ownerName, ownerSurname = selectedOwner.split()
+            sqlCursor.execute(f"DELETE FROM owner WHERE ownerName = '{ownerName}'")
+
+        ownerDeleteButton = ttk.Button(window, text="Delete Owner", command=ownerDeleteButtonFunc)
+        ownerDeleteButton.grid(row=2, column=2)
+
+
+
+window = tkinter.Tk()
+window.title("Building Inventory and Earthquake Risk Score Calculation")
+# building owner part
+ownerLabel = tkinter.Label(window, text="Building Owner")
+ownerLabel.grid(row=0, column=0)
+ownerSelectLabel = tkinter.Label(window, text="Select Operation:   ")
+ownerSelectLabel.grid(row=1, column=0)
+ownerSelectCombobox = ttk.Combobox(window, state="readonly", values=["Add", "Edit", "Delete"])
+ownerSelectCombobox.grid(row=1, column=1)
+ownerSelectButton = ttk.Button(window, text="Get Value", command=ownerSelectButtonFunc)
+ownerSelectButton.grid(row=1, column=2)
+
+
+
+
+window.mainloop()
+
+
+
+
+
 
 
 def createTables():  # for creating tables
@@ -49,11 +103,11 @@ def fillTables():  # for filling the tables
 
 
 
-createTables()
-fillTables()
+# createTables()
+# fillTables()
 
-for row in sqlCursor.execute("SELECT * FROM owner"):
-    print(row)
+#for row in sqlCursor.execute("SELECT * FROM owner"):
+ #   print(row)
 
 sqlConnection.commit()
 sqlConnection.close()
