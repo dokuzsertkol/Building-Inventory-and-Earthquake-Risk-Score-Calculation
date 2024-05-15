@@ -8,14 +8,34 @@ sqlCursor = sqlConnection.cursor()
 
 
 # GUI
+def resetOwnerFrame():
+    global ownerSelectCombobox
+    for widget in ownerFrame.winfo_children():
+        widget.destroy()
+    tkinter.Label(ownerFrame, text="Building Owner").grid(row=0, column=1)
+    tkinter.Label(ownerFrame, text="Select Operation:   ").grid(row=1, column=0)
+    ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly",
+                                       values=["Add", "Edit", "Delete", "List Information"])
+    ownerSelectCombobox.grid(row=1, column=1)
+    ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
+    tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
+
+
+def successPopUp(message: str):
+    top = tkinter.Toplevel(ownerFrame)
+    top.title("Done!")
+    tkinter.Label(top, text=message).grid(row=1, column=1)
+
+
 def errorPopUp(errorMessage: str):
-    top = tkinter.Toplevel(window)
+    top = tkinter.Toplevel(ownerFrame)
     top.title("Error!")
     tkinter.Label(top, text=errorMessage).grid(row=1, column=1)
 
 
 def ownerSelectButtonFunc():
     selectedOperation = ownerSelectCombobox.get()
+    resetOwnerFrame()
 
     if selectedOperation == "Add":
         def ownerAddButtonFunc():
@@ -35,31 +55,43 @@ def ownerSelectButtonFunc():
                     INSERT INTO owner (ownerName, ownerSurname, gender, age) VALUES
                     ("{inputName}", "{inputSurname}", "{inputGender}", {inputAge})
                     """)
-                # reset gui
+                resetOwnerFrame()
+                successPopUp("New owner is added.")
 
-        tkinter.Label(window, text="Name:  ").grid(row=3, column=0)
-        ownerAddName = tkinter.Entry(window)
+
+        ownerAddNameLabel = tkinter.Label(ownerFrame, text="Name:  ")
+        ownerAddNameLabel.grid(row=3, column=0)
+        ownerAddName = tkinter.Entry(ownerFrame)
         ownerAddName.grid(row=3, column=1)
-        tkinter.Label(window, text="Surname:  ").grid(row=4, column=0)
-        ownerAddSurname = tkinter.Entry(window)
+
+        ownerAddSurnameLabel = tkinter.Label(ownerFrame, text="Surname:  ")
+        ownerAddSurnameLabel.grid(row=4, column=0)
+        ownerAddSurname = tkinter.Entry(ownerFrame)
         ownerAddSurname.grid(row=4, column=1)
-        tkinter.Label(window, text="Gender:  ").grid(row=5, column=0)
-        ownerAddGender = ttk.Combobox(window, state="readonly", values=["male", "female", "other"])
+
+        ownerAddGenderLabel = tkinter.Label(ownerFrame, text="Gender:  ")
+        ownerAddGenderLabel.grid(row=5, column=0)
+        ownerAddGender = ttk.Combobox(ownerFrame, state="readonly", values=["male", "female", "other"])
         ownerAddGender.grid(row=5, column=1)
-        tkinter.Label(window, text="Age:  ").grid(row=6, column=0)
-        ownerAddAge = tkinter.Entry(window)
+
+        ownerAddAgeLabel = tkinter.Label(ownerFrame, text="Age:  ")
+        ownerAddAgeLabel.grid(row=6, column=0)
+        ownerAddAge = tkinter.Entry(ownerFrame)
         ownerAddAge.grid(row=6, column=1)
-        ttk.Button(window, text="Add Owner", command=ownerAddButtonFunc).grid(row=6, column=2)
+
+        ownerAddButton = ttk.Button(ownerFrame, text="Add Owner", command=ownerAddButtonFunc)
+        ownerAddButton.grid(row=6, column=2)
 
     elif selectedOperation == "Edit":
-        tkinter.Label(window, text="Select a owner to edit:   ").grid(row=3, column=0)
+        ownerSelectLabel = tkinter.Label(ownerFrame, text="Select a owner to edit:   ")
+        ownerSelectLabel.grid(row=3, column=0)
 
         sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
         ownerFullNames = list()
         for name, surname in sqlCursor:
             ownerFullNames.append(name + " " + surname)
 
-        ownerEditCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerEditCombobox = ttk.Combobox(ownerFrame, state="readonly", values=ownerFullNames)
         ownerEditCombobox.grid(row=3, column=1)
 
         def ownerEditButtonFunc():
@@ -69,36 +101,40 @@ def ownerSelectButtonFunc():
                 f"SELECT * FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             ownerInformation = sqlCursor.fetchall()
 
-            tkinter.Label(window, text="Name:  ").grid(row=4, column=0)
-            ownerListName = ttk.Entry(window)
-            ownerListName.grid(row=4, column=1)
-            ownerListName.insert(-1, ownerInformation[0][1])
+            ownerEditNameLabel = tkinter.Label(ownerFrame, text="Name:  ")
+            ownerEditNameLabel.grid(row=4, column=0)
+            ownerEditName = ttk.Entry(ownerFrame)
+            ownerEditName.grid(row=4, column=1)
+            ownerEditName.insert(-1, ownerInformation[0][1])
 
-            tkinter.Label(window, text="Surname:  ").grid(row=5, column=0)
-            ownerListSurname = ttk.Entry(window)
-            ownerListSurname.grid(row=5, column=1)
-            ownerListSurname.insert(-1, ownerInformation[0][2])
+            ownerEditSurnameLabel = tkinter.Label(ownerFrame, text="Surname:  ")
+            ownerEditSurnameLabel.grid(row=5, column=0)
+            ownerEditSurname = ttk.Entry(ownerFrame)
+            ownerEditSurname.grid(row=5, column=1)
+            ownerEditSurname.insert(-1, ownerInformation[0][2])
 
-            tkinter.Label(window, text="Gender:  ").grid(row=6, column=0)
-            ownerListGender = ttk.Combobox(window, state="readonly", values=["male", "female", "other"])
-            ownerListGender.grid(row=6, column=1)
+            ownerEditGenderLabel = tkinter.Label(ownerFrame, text="Gender:  ")
+            ownerEditGenderLabel.grid(row=6, column=0)
+            ownerEditGender = ttk.Combobox(ownerFrame, state="readonly", values=["male", "female", "other"])
+            ownerEditGender.grid(row=6, column=1)
             if ownerInformation[0][3] == "male":
-                ownerListGender.current(0)
+                ownerEditGender.current(0)
             elif ownerInformation[0][3] == "female":
-                ownerListGender.current(1)
+                ownerEditGender.current(1)
             elif ownerInformation[0][3] == "other":
-                ownerListGender.current(2)
+                ownerEditGender.current(2)
 
-            tkinter.Label(window, text="Age:  ").grid(row=7, column=0)
-            ownerListAge = ttk.Entry(window)
-            ownerListAge.grid(row=7, column=1)
-            ownerListAge.insert(-1, ownerInformation[0][4])
+            ownerEditAgeLabel = tkinter.Label(ownerFrame, text="Age:  ")
+            ownerEditAgeLabel.grid(row=7, column=0)
+            ownerEditAge = ttk.Entry(ownerFrame)
+            ownerEditAge.grid(row=7, column=1)
+            ownerEditAge.insert(-1, ownerInformation[0][4])
 
             def ownerEditSubmitButtonFunc():
-                inputName = ownerListName.get()
-                inputSurname = ownerListSurname.get()
-                inputGender = ownerListGender.get()
-                inputAge = ownerListAge.get()
+                inputName = ownerEditName.get()
+                inputSurname = ownerEditSurname.get()
+                inputGender = ownerEditGender.get()
+                inputAge = ownerEditAge.get()
 
                 if inputName == "" or inputSurname == "" or inputGender == "" or inputAge == "":
                     errorPopUp("Please fill all of the elements.")
@@ -112,21 +148,27 @@ def ownerSelectButtonFunc():
                                         gender = "{inputGender}", age = {inputAge} WHERE ownerName =
                                         "{ownerInformation[0][1]}" AND ownerSurname = "{ownerInformation[0][2]}"
                                     """)
-                    # reset gui
+                    resetOwnerFrame()
+                    successPopUp("Owner information is updated.")
 
-            ttk.Button(window, text="Submit", command=ownerEditSubmitButtonFunc).grid(row=7, column=2)
 
-        ttk.Button(window, text="Edit Owner", command=ownerEditButtonFunc).grid(row=3, column=2)
+
+            ownerEditSubmitButton = ttk.Button(ownerFrame, text="Submit", command=ownerEditSubmitButtonFunc)
+            ownerEditSubmitButton.grid(row=7, column=2)
+
+        ownerEditButton = ttk.Button(ownerFrame, text="Edit Owner", command=ownerEditButtonFunc)
+        ownerEditButton.grid(row=3, column=2)
 
     elif selectedOperation == "Delete":
-        tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
+        ownerDeleteLabel = tkinter.Label(ownerFrame, text="Select a owner to delete:   ")
+        ownerDeleteLabel.grid(row=3, column=0)
 
         sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
         ownerFullNames = list()
         for name, surname in sqlCursor:
             ownerFullNames.append(name + " " + surname)
 
-        ownerDeleteCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerDeleteCombobox = ttk.Combobox(ownerFrame, state="readonly", values=ownerFullNames)
         ownerDeleteCombobox.grid(row=3, column=1)
 
         def ownerDeleteButtonFunc():
@@ -135,56 +177,74 @@ def ownerSelectButtonFunc():
             sqlCursor.execute(
                 f"DELETE FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             sqlCursor.execute(f"UPDATE building SET owner = '<No Owner>' WHERE owner = '{selectedOwner}'")
-            # reset gui
 
-        ttk.Button(window, text="Delete Owner", command=ownerDeleteButtonFunc).grid(row=3, column=2)
+            resetOwnerFrame()
+            successPopUp("Selected owner is deleted.")
+
+
+        ownerDeleteButton = ttk.Button(ownerFrame, text="Delete Owner", command=ownerDeleteButtonFunc)
+        ownerDeleteButton.grid(row=3, column=2)
 
     elif selectedOperation == "List Information":
-        tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
+        ownerListLabel = tkinter.Label(ownerFrame, text="Select a owner to list its information:   ")
+        ownerListLabel.grid(row=3, column=0)
 
         sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
         ownerFullNames = list()
         for name, surname in sqlCursor:
             ownerFullNames.append(name + " " + surname)
 
-        ownerListCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerListCombobox = ttk.Combobox(ownerFrame, state="readonly", values=ownerFullNames)
         ownerListCombobox.grid(row=3, column=1)
 
         def ownerListButtonFunc():
-            # reset gui
+            nonlocal isListed
+
             selectedOwner = ownerListCombobox.get()
             ownerName, ownerSurname = selectedOwner.split()
             sqlCursor.execute(f"SELECT * FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             ownerInformation = sqlCursor.fetchall()
 
-            tkinter.Label(window, text="ID:  ").grid(row=4, column=0)
-            tkinter.Label(window, text=ownerInformation[0][0]).grid(row=4, column=1)
-            tkinter.Label(window, text="Name:  ").grid(row=5, column=0)
-            tkinter.Label(window, text=ownerInformation[0][1]).grid(row=5, column=1)
-            tkinter.Label(window, text="Surname:  ").grid(row=6, column=0)
-            tkinter.Label(window, text=ownerInformation[0][2]).grid(row=6, column=1)
-            tkinter.Label(window, text="Gender:  ").grid(row=7, column=0)
-            tkinter.Label(window, text=ownerInformation[0][3]).grid(row=7, column=1)
-            tkinter.Label(window, text="Age:  ").grid(row=8, column=0)
-            tkinter.Label(window, text=ownerInformation[0][4]).grid(row=8, column=1)
+            tkinter.Label(ownerFrame, text="ID:  ").grid(row=4, column=0)
+            tkinter.Label(ownerFrame, text=ownerInformation[0][0]).grid(row=4, column=1)
+            tkinter.Label(ownerFrame, text="Name:  ").grid(row=5, column=0)
+            tkinter.Label(ownerFrame, text=ownerInformation[0][1]).grid(row=5, column=1)
+            tkinter.Label(ownerFrame, text="Surname:  ").grid(row=6, column=0)
+            tkinter.Label(ownerFrame, text=ownerInformation[0][2]).grid(row=6, column=1)
+            tkinter.Label(ownerFrame, text="Gender:  ").grid(row=7, column=0)
+            tkinter.Label(ownerFrame, text=ownerInformation[0][3]).grid(row=7, column=1)
+            tkinter.Label(ownerFrame, text="Age:  ").grid(row=8, column=0)
+            tkinter.Label(ownerFrame, text=ownerInformation[0][4]).grid(row=8, column=1)
 
-        ttk.Button(window, text="List Information", command=ownerListButtonFunc).grid(row=3, column=2)
+            # reset gui
+            if isListed:
+                resetOwnerFrame()
+                isListed = False
+            else:
+                ownerListButton.config(text="Clear")
+                isListed = True
+        isListed = False
+        ownerListButton = ttk.Button(ownerFrame, text="List Information", command=ownerListButtonFunc)
+        ownerListButton.grid(row=3, column=2)
 
 
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
 # building owner part
-tkinter.Label(window, text="Building Owner").grid(row=0, column=1)
-tkinter.Label(window, text="Select Operation:   ").grid(row=1, column=0)
-ownerSelectCombobox = ttk.Combobox(window, state="readonly", values=["Add", "Edit", "Delete", "List Information"])
+ownerFrame = tkinter.Frame(window)
+ownerFrame.grid(row=0, column=0)
+
+tkinter.Label(ownerFrame, text="Building Owner").grid(row=0, column=1)
+tkinter.Label(ownerFrame, text="Select Operation:   ").grid(row=1, column=0)
+ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly", values=["Add", "Edit", "Delete", "List Information"])
 ownerSelectCombobox.grid(row=1, column=1)
-ttk.Button(window, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
-tkinter.Label(window, text="--------").grid(row=2, column=1)
+ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
+tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
 
 
 
 
-window.mainloop()
+ownerFrame.mainloop()
 
 
 
