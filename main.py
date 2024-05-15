@@ -8,15 +8,52 @@ sqlCursor = sqlConnection.cursor()
 
 
 # GUI
+def errorPopUp(errorMessage: str):
+    top = tkinter.Toplevel(window)
+    top.title("Error!")
+    tkinter.Label(top, text=errorMessage).grid(row=1, column=1)
+
+
 def ownerSelectButtonFunc():
     selectedOperation = ownerSelectCombobox.get()
     if selectedOperation == "Add":
-        pass
+        def ownerAddButtonFunc():
+            inputName = ownerAddName.get()
+            inputSurname = ownerAddSurname.get()
+            inputGender = ownerAddGender.get()
+            inputAge = ownerAddAge.get()
+
+            if inputName == "" or inputSurname == "" or inputGender == "" or inputAge == "":
+                errorPopUp("Please fill all of the elements.")
+            elif len((inputName + inputSurname + inputAge + inputGender).split()) != 1:
+                errorPopUp("Space character is not allowed in elements")
+            elif not inputAge.isdigit():
+                errorPopUp("Age should be numeric")
+            else:
+                sqlCursor.execute(f"""
+                    INSERT INTO owner (ownerName, ownerSurname, gender, age) VALUES
+                    ("{inputName}", "{inputSurname}", "{inputGender}", {inputAge})
+                    """)
+                # reset gui
+
+        tkinter.Label(window, text="Name:  ").grid(row=3, column=0)
+        ownerAddName = tkinter.Entry(window)
+        ownerAddName.grid(row=3, column=1)
+        tkinter.Label(window, text="Surname:  ").grid(row=4, column=0)
+        ownerAddSurname = tkinter.Entry(window)
+        ownerAddSurname.grid(row=4, column=1)
+        tkinter.Label(window, text="Gender:  ").grid(row=5, column=0)
+        ownerAddGender = ttk.Combobox(window, state="readonly", values=["male", "female", "other"])
+        ownerAddGender.grid(row=5, column=1)
+        tkinter.Label(window, text="Age:  ").grid(row=6, column=0)
+        ownerAddAge = tkinter.Entry(window)
+        ownerAddAge.grid(row=6, column=1)
+        ttk.Button(window, text="Add Owner", command=ownerAddButtonFunc).grid(row=6, column=2)
+
     elif selectedOperation == "Edit":
         pass
     elif selectedOperation == "Delete":
-        ownerDeleteLabel = tkinter.Label(window, text="Select a owner to delete:   ")
-        ownerDeleteLabel.grid(row=2, column=0)
+        tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
 
         sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
         ownerFullNames = list()
@@ -24,29 +61,28 @@ def ownerSelectButtonFunc():
             ownerFullNames.append(name + " " + surname)
 
         ownerDeleteCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
-        ownerDeleteCombobox.grid(row=2, column=1)
+        ownerDeleteCombobox.grid(row=3, column=1)
 
         def ownerDeleteButtonFunc():
             selectedOwner = ownerDeleteCombobox.get()
             ownerName, ownerSurname = selectedOwner.split()
-            sqlCursor.execute(f"DELETE FROM owner WHERE ownerName = '{ownerName}'")
+            sqlCursor.execute(f"DELETE FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
+            sqlCursor.execute(f"UPDATE building SET owner = '<No Owner>' WHERE owner = '{selectedOwner}'")
+            # reset gui
 
-        ownerDeleteButton = ttk.Button(window, text="Delete Owner", command=ownerDeleteButtonFunc)
-        ownerDeleteButton.grid(row=2, column=2)
+        ttk.Button(window, text="Delete Owner", command=ownerDeleteButtonFunc).grid(row=3, column=2)
 
 
 
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
 # building owner part
-ownerLabel = tkinter.Label(window, text="Building Owner")
-ownerLabel.grid(row=0, column=0)
-ownerSelectLabel = tkinter.Label(window, text="Select Operation:   ")
-ownerSelectLabel.grid(row=1, column=0)
+tkinter.Label(window, text="Building Owner").grid(row=0, column=1)
+tkinter.Label(window, text="Select Operation:   ").grid(row=1, column=0)
 ownerSelectCombobox = ttk.Combobox(window, state="readonly", values=["Add", "Edit", "Delete"])
 ownerSelectCombobox.grid(row=1, column=1)
-ownerSelectButton = ttk.Button(window, text="Get Value", command=ownerSelectButtonFunc)
-ownerSelectButton.grid(row=1, column=2)
+ttk.Button(window, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
+tkinter.Label(window, text="--------").grid(row=2, column=1)
 
 
 
@@ -60,11 +96,11 @@ window.mainloop()
 
 
 def createTables():  # for creating tables
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS building(id, owner INTEGER, name, number, address, "
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS building(id, owner, name, number, address, "
                       "coordinate);")  # building table
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(floors, square, year, zone, type, geometry, isBasement, "
                       "width, length, damaged, risk);")  # building features table
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no, ownerName, ownerSurname, gender, age);")  # owner table
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
 
 
 def fillTables():  # for filling the tables
