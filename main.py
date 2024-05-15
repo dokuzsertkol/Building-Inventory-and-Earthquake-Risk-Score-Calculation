@@ -16,6 +16,7 @@ def errorPopUp(errorMessage: str):
 
 def ownerSelectButtonFunc():
     selectedOperation = ownerSelectCombobox.get()
+
     if selectedOperation == "Add":
         def ownerAddButtonFunc():
             inputName = ownerAddName.get()
@@ -52,6 +53,7 @@ def ownerSelectButtonFunc():
 
     elif selectedOperation == "Edit":
         pass
+
     elif selectedOperation == "Delete":
         tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
 
@@ -72,6 +74,36 @@ def ownerSelectButtonFunc():
 
         ttk.Button(window, text="Delete Owner", command=ownerDeleteButtonFunc).grid(row=3, column=2)
 
+    elif selectedOperation == "List Information":
+        tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
+
+        sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
+        ownerFullNames = list()
+        for name, surname in sqlCursor:
+            ownerFullNames.append(name + " " + surname)
+
+        ownerListCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerListCombobox.grid(row=3, column=1)
+
+        def ownerListButtonFunc():
+            # reset gui
+            selectedOwner = ownerListCombobox.get()
+            ownerName, ownerSurname = selectedOwner.split()
+            sqlCursor.execute(f"SELECT * FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
+            ownerInformation = sqlCursor.fetchall()
+            
+            tkinter.Label(window, text="ID:  ").grid(row=4, column=0)
+            tkinter.Label(window, text=ownerInformation[0][0]).grid(row=4, column=1)
+            tkinter.Label(window, text="Name:  ").grid(row=5, column=0)
+            tkinter.Label(window, text=ownerInformation[0][1]).grid(row=5, column=1)
+            tkinter.Label(window, text="Surname:  ").grid(row=6, column=0)
+            tkinter.Label(window, text=ownerInformation[0][2]).grid(row=6, column=1)
+            tkinter.Label(window, text="Gender:  ").grid(row=7, column=0)
+            tkinter.Label(window, text=ownerInformation[0][3]).grid(row=7, column=1)
+            tkinter.Label(window, text="Age:  ").grid(row=8, column=0)
+            tkinter.Label(window, text=ownerInformation[0][4]).grid(row=8, column=1)
+
+        ttk.Button(window, text="List Information", command=ownerListButtonFunc).grid(row=3, column=2)
 
 
 window = tkinter.Tk()
@@ -79,7 +111,7 @@ window.title("Building Inventory and Earthquake Risk Score Calculation")
 # building owner part
 tkinter.Label(window, text="Building Owner").grid(row=0, column=1)
 tkinter.Label(window, text="Select Operation:   ").grid(row=1, column=0)
-ownerSelectCombobox = ttk.Combobox(window, state="readonly", values=["Add", "Edit", "Delete"])
+ownerSelectCombobox = ttk.Combobox(window, state="readonly", values=["Add", "Edit", "Delete", "List Information"])
 ownerSelectCombobox.grid(row=1, column=1)
 ttk.Button(window, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
 tkinter.Label(window, text="--------").grid(row=2, column=1)
