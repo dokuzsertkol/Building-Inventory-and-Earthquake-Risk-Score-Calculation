@@ -7,6 +7,56 @@ sqlConnection = sqlite3.connect("sqlDatabase.db")
 sqlCursor = sqlConnection.cursor()
 
 
+# database functions
+def dropTables():
+    sqlCursor.execute("DROP TABLE IF EXISTS owner")
+    sqlCursor.execute("DROP TABLE IF EXISTS features")
+    sqlCursor.execute("DROP TABLE IF EXISTS building")
+
+
+def createTables():  # for creating tables
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS building(id, owner, name, number, address, "
+                      "coordinate);")  # building table
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(floors, square, year, zone, type, geometry, isBasement, "
+                      "width, length, damaged, risk);")  # building features table
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
+
+
+def fillTables():  # for filling the tables
+    sqlCursor.execute("""
+        INSERT INTO owner VALUES
+            (1, "Henry", "Blackburne", "male", 35),
+            (2, "Emily", "Scarlett", "female", 27),
+            (3, "Diva", "Smith", "female", 56),
+            (4, "John", "Tractor", "male", 98),
+            (5, "Elliot", "Pearl", "other", 21);
+        """)
+    sqlCursor.execute("""
+        INSERT INTO building VALUES
+            (1, "Henry Blackburne", "AA", 11, "Province1, District1, Neighbourhood1, Street1", "0, 0"),
+            (2, "Henry Blackburne", "BB", 12, "Province2, District2, Neighbourhood2, Street2", "0, 1"),
+            (3, "Henry Blackburne", "CC", 13, "Province3, District3, Neighbourhood3, Street3", "0, 2"),
+            (4, "Emily Scarlett", "DD", 14, "Province4, District4, Neighbourhood4, Street4", "1, 0"),
+            (5, "Emily Scarlett", "EE", 15, "Province5, District5, Neighbourhood5, Street5", "1, 1"),
+            (6, "Emily Scarlett", "FF", 16, "Province6, District6, Neighbourhood6, Street6", "1, 2"),
+            (7, "Diva Smith", "GG", 17, "Province, District7, Neighbourhood7, Street7", "2, 0"),
+            (8, "Diva Smith", "HH", 18, "Province8, District8, Neighbourhood8, Street8", "2, 1"),
+            (9, "Diva Smith", "II", 19, "Province9, District9, Neighbourhood9, Street9", "2, 2"),
+            (10, "John Tractor", "JJ", 20, "Province10, District10, Neighbourhood10, Street10", "3, 0"),
+            (11, "John Tractor", "KK", 21, "Province11, District11, Neighbourhood11, Street11", "3, 1"),
+            (12, "John Tractor", "LL", 22, "Province12, District12, Neighbourhood12, Street12", "3, 2"),
+            (13, "Elliot Pearl", "MM", 23, "Province13, District13, Neighbourhood13, Street13", "4, 0"),
+            (14, "Elliot Pearl", "NN", 24, "Province14, District14, Neighbourhood14, Street14", "4, 1"),
+            (15, "Elliot Pearl", "OO", 25, "Province15, District15, Neighbourhood15, Street15", "4, 2");
+        """)
+
+
+def resetTables():
+    dropTables()
+    createTables()
+    fillTables()
+
+
 # GUI
 def resetOwnerFrame():
     global ownerSelectCombobox
@@ -19,6 +69,10 @@ def resetOwnerFrame():
     ownerSelectCombobox.grid(row=1, column=1)
     ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
     tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
+    tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
+    tkinter.Label(ownerFrame, text="    |   ").grid(row=0, column=4)
+    tkinter.Label(ownerFrame, text="    |   ").grid(row=1, column=4)
+    tkinter.Label(ownerFrame, text="    |   ").grid(row=2, column=4)
 
 
 def successPopUp(message: str):
@@ -230,6 +284,14 @@ def ownerSelectButtonFunc():
 
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
+
+# menu
+menu = tkinter.Menu(window)
+window.config(menu=menu)
+databaseMenu = tkinter.Menu(menu)
+menu.add_cascade(label="Database", menu=databaseMenu)
+databaseMenu.add_command(label='Reset Database to Initial State', command=resetTables)
+
 # building owner part
 ownerFrame = tkinter.Frame(window)
 ownerFrame.grid(row=0, column=0)
@@ -240,67 +302,21 @@ ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly", values=["Add", 
 ownerSelectCombobox.grid(row=1, column=1)
 ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
 tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
+tkinter.Label(ownerFrame, text="    |   ").grid(row=0, column=4)
+tkinter.Label(ownerFrame, text="    |   ").grid(row=1, column=4)
+tkinter.Label(ownerFrame, text="    |   ").grid(row=2, column=4)
 
+# building information part
+buildingFrame = tkinter.Frame(window)
+buildingFrame.grid(row=0, column=1)
 
+tkinter.Label(buildingFrame, text="Building Owner").grid(row=0, column=1)
+tkinter.Label(buildingFrame, text="Select Operation:   ").grid(row=1, column=0)
 
+#sqlCursor.execute("SELECT ")
+tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
 
 ownerFrame.mainloop()
-
-
-
-
-
-
-
-def createTables():  # for creating tables
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS building(id, owner, name, number, address, "
-                      "coordinate);")  # building table
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(floors, square, year, zone, type, geometry, isBasement, "
-                      "width, length, damaged, risk);")  # building features table
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
-
-
-def fillTables():  # for filling the tables
-    sqlCursor.execute("""
-        INSERT INTO owner VALUES
-            (1, "Henry", "Blackburne", "male", 35),
-            (2, "Emily", "Scarlett", "female", 27),
-            (3, "Diva", "Smith", "female", 56),
-            (4, "John", "Tractor", "male", 98),
-            (5, "Elliot", "Pearl", "other", 21);
-        """)
-    sqlCursor.execute("""
-        INSERT INTO building VALUES
-            (1, "Henry Blackburne", "AA", 11, "Province1, District1, Neighbourhood1, Street1", "0, 0"),
-            (2, "Henry Blackburne", "BB", 12, "Province2, District2, Neighbourhood2, Street2", "0, 1"),
-            (3, "Henry Blackburne", "CC", 13, "Province3, District3, Neighbourhood3, Street3", "0, 2"),
-            (4, "Emily Scarlett", "DD", 14, "Province4, District4, Neighbourhood4, Street4", "1, 0"),
-            (5, "Emily Scarlett", "EE", 15, "Province5, District5, Neighbourhood5, Street5", "1, 1"),
-            (6, "Emily Scarlett", "FF", 16, "Province6, District6, Neighbourhood6, Street6", "1, 2"),
-            (7, "Diva Smith", "GG", 17, "Province, District7, Neighbourhood7, Street7", "2, 0"),
-            (8, "Diva Smith", "HH", 18, "Province8, District8, Neighbourhood8, Street8", "2, 1"),
-            (9, "Diva Smith", "II", 19, "Province9, District9, Neighbourhood9, Street9", "2, 2"),
-            (10, "John Tractor", "JJ", 20, "Province10, District10, Neighbourhood10, Street10", "3, 0"),
-            (11, "John Tractor", "KK", 21, "Province11, District11, Neighbourhood11, Street11", "3, 1"),
-            (12, "John Tractor", "LL", 22, "Province12, District12, Neighbourhood12, Street12", "3, 2"),
-            (13, "Elliot Pearl", "MM", 23, "Province13, District13, Neighbourhood13, Street13", "4, 0"),
-            (14, "Elliot Pearl", "NN", 24, "Province14, District14, Neighbourhood14, Street14", "4, 1"),
-            (15, "Elliot Pearl", "OO", 25, "Province15, District15, Neighbourhood15, Street15", "4, 2");
-        """)
-
-
-
-
-
-
-
-
-
-# createTables()
-# fillTables()
-
-#for row in sqlCursor.execute("SELECT * FROM owner"):
- #   print(row)
 
 sqlConnection.commit()
 sqlConnection.close()
