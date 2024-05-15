@@ -52,7 +52,71 @@ def ownerSelectButtonFunc():
         ttk.Button(window, text="Add Owner", command=ownerAddButtonFunc).grid(row=6, column=2)
 
     elif selectedOperation == "Edit":
-        pass
+        tkinter.Label(window, text="Select a owner to edit:   ").grid(row=3, column=0)
+
+        sqlCursor.execute("SELECT ownerName, ownerSurname FROM owner")
+        ownerFullNames = list()
+        for name, surname in sqlCursor:
+            ownerFullNames.append(name + " " + surname)
+
+        ownerEditCombobox = ttk.Combobox(window, state="readonly", values=ownerFullNames)
+        ownerEditCombobox.grid(row=3, column=1)
+
+        def ownerEditButtonFunc():
+            selectedOwner = ownerEditCombobox.get()
+            ownerName, ownerSurname = selectedOwner.split()
+            sqlCursor.execute(
+                f"SELECT * FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
+            ownerInformation = sqlCursor.fetchall()
+
+            tkinter.Label(window, text="Name:  ").grid(row=4, column=0)
+            ownerListName = ttk.Entry(window)
+            ownerListName.grid(row=4, column=1)
+            ownerListName.insert(-1, ownerInformation[0][1])
+
+            tkinter.Label(window, text="Surname:  ").grid(row=5, column=0)
+            ownerListSurname = ttk.Entry(window)
+            ownerListSurname.grid(row=5, column=1)
+            ownerListSurname.insert(-1, ownerInformation[0][2])
+
+            tkinter.Label(window, text="Gender:  ").grid(row=6, column=0)
+            ownerListGender = ttk.Combobox(window, state="readonly", values=["male", "female", "other"])
+            ownerListGender.grid(row=6, column=1)
+            if ownerInformation[0][3] == "male":
+                ownerListGender.current(0)
+            elif ownerInformation[0][3] == "female":
+                ownerListGender.current(1)
+            elif ownerInformation[0][3] == "other":
+                ownerListGender.current(2)
+
+            tkinter.Label(window, text="Age:  ").grid(row=7, column=0)
+            ownerListAge = ttk.Entry(window)
+            ownerListAge.grid(row=7, column=1)
+            ownerListAge.insert(-1, ownerInformation[0][4])
+
+            def ownerEditSubmitButtonFunc():
+                inputName = ownerListName.get()
+                inputSurname = ownerListSurname.get()
+                inputGender = ownerListGender.get()
+                inputAge = ownerListAge.get()
+
+                if inputName == "" or inputSurname == "" or inputGender == "" or inputAge == "":
+                    errorPopUp("Please fill all of the elements.")
+                elif len((inputName + inputSurname + inputAge + inputGender).split()) != 1:
+                    errorPopUp("Space character is not allowed in elements")
+                elif not inputAge.isdigit():
+                    errorPopUp("Age should be numeric")
+                else:
+                    sqlCursor.execute(f"""
+                                    UPDATE owner SET ownerName = "{inputName}", ownerSurname = "{inputSurname}", 
+                                        gender = "{inputGender}", age = {inputAge} WHERE ownerName =
+                                        "{ownerInformation[0][1]}" AND ownerSurname = "{ownerInformation[0][2]}"
+                                    """)
+                    # reset gui
+
+            ttk.Button(window, text="Submit", command=ownerEditSubmitButtonFunc).grid(row=7, column=2)
+
+        ttk.Button(window, text="Edit Owner", command=ownerEditButtonFunc).grid(row=3, column=2)
 
     elif selectedOperation == "Delete":
         tkinter.Label(window, text="Select a owner to delete:   ").grid(row=3, column=0)
@@ -68,7 +132,8 @@ def ownerSelectButtonFunc():
         def ownerDeleteButtonFunc():
             selectedOwner = ownerDeleteCombobox.get()
             ownerName, ownerSurname = selectedOwner.split()
-            sqlCursor.execute(f"DELETE FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
+            sqlCursor.execute(
+                f"DELETE FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             sqlCursor.execute(f"UPDATE building SET owner = '<No Owner>' WHERE owner = '{selectedOwner}'")
             # reset gui
 
@@ -91,7 +156,7 @@ def ownerSelectButtonFunc():
             ownerName, ownerSurname = selectedOwner.split()
             sqlCursor.execute(f"SELECT * FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             ownerInformation = sqlCursor.fetchall()
-            
+
             tkinter.Label(window, text="ID:  ").grid(row=4, column=0)
             tkinter.Label(window, text=ownerInformation[0][0]).grid(row=4, column=1)
             tkinter.Label(window, text="Name:  ").grid(row=5, column=0)
