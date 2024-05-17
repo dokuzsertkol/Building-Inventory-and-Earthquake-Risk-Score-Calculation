@@ -55,6 +55,8 @@ def resetTables():
     dropTables()
     createTables()
     fillTables()
+    resetOwnerFrame()
+    resetBuildingFrame()
 
 
 # GUI functions
@@ -73,6 +75,32 @@ def resetOwnerFrame():
     tkinter.Label(ownerFrame, text="    |   ").grid(row=0, column=4)
     tkinter.Label(ownerFrame, text="    |   ").grid(row=1, column=4)
     tkinter.Label(ownerFrame, text="    |   ").grid(row=2, column=4)
+
+
+def resetBuildingFrame():
+    global buildingSelectCombobox
+    for widget in buildingFrame.winfo_children():
+        widget.destroy()
+    tkinter.Label(buildingFrame, text="Add Building Information").grid(row=0, column=1)
+    tkinter.Label(buildingFrame, text="Select Building:   ").grid(row=1, column=0)
+    sqlCursor.execute("SELECT name FROM building")
+
+    buildingList = list()
+    for building in sqlCursor:
+        buildingList.append(building[0])
+    sqlCursor.execute("SELECT buildingName FROM features")
+    buildingsWithInfo = list()
+    for building in sqlCursor:
+        buildingsWithInfo.append(building[0])
+    if len(buildingsWithInfo) != 0:
+        buildingList = [build for build in buildingList if build not in buildingsWithInfo]
+
+    buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=buildingList)
+    buildingSelectCombobox.grid(row=1, column=1)
+
+    ttk.Button(buildingFrame, text="OK", command=buildingSelectButtonFunc).grid(row=1, column=2)
+
+    tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
 
 
 def successPopUp(message: str):
@@ -109,6 +137,7 @@ def ownerSelectButtonFunc():
                     INSERT INTO owner (ownerName, ownerSurname, gender, age) VALUES
                     ("{inputName}", "{inputSurname}", "{inputGender}", {inputAge})
                     """)
+                sqlConnection.commit()
                 resetOwnerFrame()
                 successPopUp("New owner is added.")
 
@@ -202,6 +231,7 @@ def ownerSelectButtonFunc():
                                         gender = "{inputGender}", age = {inputAge} WHERE ownerName =
                                         "{ownerInformation[0][1]}" AND ownerSurname = "{ownerInformation[0][2]}"
                                     """)
+                    sqlConnection.commit()
                     resetOwnerFrame()
                     successPopUp("Owner information is updated.")
 
@@ -232,6 +262,7 @@ def ownerSelectButtonFunc():
                 f"DELETE FROM owner WHERE ownerName = '{ownerName}' AND ownerSurname = '{ownerSurname}'")
             sqlCursor.execute(f"UPDATE building SET owner = '<No Owner>' WHERE owner = '{selectedOwner}'")
 
+            sqlConnection.commit()
             resetOwnerFrame()
             successPopUp("Selected owner is deleted.")
 
@@ -286,8 +317,11 @@ def buildingSelectButtonFunc():
     selectedBuilding = buildingSelectCombobox.get()
     if selectedBuilding == "":
         return
+
+    resetBuildingFrame()
     sqlCursor.execute(f"SELECT * FROM building WHERE name = '{selectedBuilding}'")
     buildingInfo = sqlCursor.fetchall()
+
     tkinter.Label(buildingFrame, text="ID:").grid(row=4, column=0)
     tkinter.Label(buildingFrame, text=buildingInfo[0][0]).grid(row=4, column=1)
     tkinter.Label(buildingFrame, text="Owner:").grid(row=5, column=0)
@@ -364,6 +398,7 @@ def buildingSelectButtonFunc():
             errorPopUp("Length should be numeric")
             return
         else:
+            resetBuildingFrame()
             # calculating risk score
             floor = int(floor)
             square = int(square)
@@ -419,11 +454,9 @@ def buildingSelectButtonFunc():
                 INSERT INTO features VALUES ("{selectedBuilding}", {floor}, {square}, {year}, {zone}, "{type_}",
                 "{geometry}", "{basement}", {width}, {length}, "{damaged}", {point})
                 """)
-
+            sqlConnection.commit()
+            resetBuildingFrame()
             successPopUp("Risk point has calculated and information is added to the database.")
-
-            # reset gui
-            # burada kaldım
 
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
 
@@ -441,33 +474,17 @@ databaseMenu.add_command(label='Reset Database to Initial State', command=resetT
 # building owner part
 ownerFrame = tkinter.Frame(window)
 ownerFrame.grid(row=0, column=0)
-
-tkinter.Label(ownerFrame, text="Building Owner").grid(row=0, column=1)
-tkinter.Label(ownerFrame, text="Select Operation:   ").grid(row=1, column=0)
 ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly", values=["Add", "Edit", "Delete", "List Information"])
 ownerSelectCombobox.grid(row=1, column=1)
-ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
-tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
-tkinter.Label(ownerFrame, text="    |   ").grid(row=0, column=4)
-tkinter.Label(ownerFrame, text="    |   ").grid(row=1, column=4)
-tkinter.Label(ownerFrame, text="    |   ").grid(row=2, column=4)
+resetOwnerFrame()
 
 # building information part
 buildingFrame = tkinter.Frame(window)
 buildingFrame.grid(row=0, column=1)
-
-tkinter.Label(buildingFrame, text="Building Owner").grid(row=0, column=1)
-tkinter.Label(buildingFrame, text="Select Building:   ").grid(row=1, column=0)
-sqlCursor.execute("SELECT name FROM building")
-buildingList = list()
-for building in sqlCursor:
-    buildingList.append(building[0])
-buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=buildingList)
+buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=[])
 buildingSelectCombobox.grid(row=1, column=1)
+resetBuildingFrame()
 
-ttk.Button(buildingFrame, text="OK", command=buildingSelectButtonFunc).grid(row=1, column=2)
-
-tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
 
 ownerFrame.mainloop()
 
