@@ -17,8 +17,8 @@ def dropTables():
 def createTables():  # for creating tables
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS building(id, owner, name, number, address, "
                       "coordinate);")  # building table
-    sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(floors, square, year, zone, type, geometry, isBasement, "
-                      "width, length, damaged, risk);")  # building features table
+    sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(buildingName, floors, square, year, zone, type, geometry, "
+                      "isBasement, width, length, damaged, risk);")  # building features table
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
 
 
@@ -33,21 +33,21 @@ def fillTables():  # for filling the tables
         """)
     sqlCursor.execute("""
         INSERT INTO building VALUES
-            (1, "Henry Blackburne", "AA", 11, "Province1, District1, Neighbourhood1, Street1", "0, 0"),
-            (2, "Henry Blackburne", "BB", 12, "Province2, District2, Neighbourhood2, Street2", "0, 1"),
-            (3, "Henry Blackburne", "CC", 13, "Province3, District3, Neighbourhood3, Street3", "0, 2"),
-            (4, "Emily Scarlett", "DD", 14, "Province4, District4, Neighbourhood4, Street4", "1, 0"),
-            (5, "Emily Scarlett", "EE", 15, "Province5, District5, Neighbourhood5, Street5", "1, 1"),
-            (6, "Emily Scarlett", "FF", 16, "Province6, District6, Neighbourhood6, Street6", "1, 2"),
-            (7, "Diva Smith", "GG", 17, "Province, District7, Neighbourhood7, Street7", "2, 0"),
-            (8, "Diva Smith", "HH", 18, "Province8, District8, Neighbourhood8, Street8", "2, 1"),
-            (9, "Diva Smith", "II", 19, "Province9, District9, Neighbourhood9, Street9", "2, 2"),
-            (10, "John Tractor", "JJ", 20, "Province10, District10, Neighbourhood10, Street10", "3, 0"),
-            (11, "John Tractor", "KK", 21, "Province11, District11, Neighbourhood11, Street11", "3, 1"),
-            (12, "John Tractor", "LL", 22, "Province12, District12, Neighbourhood12, Street12", "3, 2"),
-            (13, "Elliot Pearl", "MM", 23, "Province13, District13, Neighbourhood13, Street13", "4, 0"),
-            (14, "Elliot Pearl", "NN", 24, "Province14, District14, Neighbourhood14, Street14", "4, 1"),
-            (15, "Elliot Pearl", "OO", 25, "Province15, District15, Neighbourhood15, Street15", "4, 2");
+            (1, "Henry Blackburne", "Building1", 11, "Province1, District1, Neighbourhood1, Street1", "0, 0"),
+            (2, "Henry Blackburne", "Building2", 12, "Province2, District2, Neighbourhood2, Street2", "0, 1"),
+            (3, "Henry Blackburne", "Building3", 13, "Province3, District3, Neighbourhood3, Street3", "0, 2"),
+            (4, "Emily Scarlett", "Building4", 14, "Province4, District4, Neighbourhood4, Street4", "1, 0"),
+            (5, "Emily Scarlett", "Building5", 15, "Province5, District5, Neighbourhood5, Street5", "1, 1"),
+            (6, "Emily Scarlett", "Building6", 16, "Province6, District6, Neighbourhood6, Street6", "1, 2"),
+            (7, "Diva Smith", "Building7", 17, "Province, District7, Neighbourhood7, Street7", "2, 0"),
+            (8, "Diva Smith", "Building8", 18, "Province8, District8, Neighbourhood8, Street8", "2, 1"),
+            (9, "Diva Smith", "Building9", 19, "Province9, District9, Neighbourhood9, Street9", "2, 2"),
+            (10, "John Tractor", "Building10", 20, "Province10, District10, Neighbourhood10, Street10", "3, 0"),
+            (11, "John Tractor", "Building11", 21, "Province11, District11, Neighbourhood11, Street11", "3, 1"),
+            (12, "John Tractor", "Building12", 22, "Province12, District12, Neighbourhood12, Street12", "3, 2"),
+            (13, "Elliot Pearl", "Building13", 23, "Province13, District13, Neighbourhood13, Street13", "4, 0"),
+            (14, "Elliot Pearl", "Building14", 24, "Province14, District14, Neighbourhood14, Street14", "4, 1"),
+            (15, "Elliot Pearl", "Building15", 25, "Province15, District15, Neighbourhood15, Street15", "4, 2");
         """)
 
 
@@ -57,7 +57,7 @@ def resetTables():
     fillTables()
 
 
-# GUI
+# GUI functions
 def resetOwnerFrame():
     global ownerSelectCombobox
     for widget in ownerFrame.winfo_children():
@@ -282,6 +282,152 @@ def ownerSelectButtonFunc():
         ownerListButton.grid(row=3, column=2)
 
 
+def buildingSelectButtonFunc():
+    selectedBuilding = buildingSelectCombobox.get()
+    if selectedBuilding == "":
+        return
+    sqlCursor.execute(f"SELECT * FROM building WHERE name = '{selectedBuilding}'")
+    buildingInfo = sqlCursor.fetchall()
+    tkinter.Label(buildingFrame, text="ID:").grid(row=4, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][0]).grid(row=4, column=1)
+    tkinter.Label(buildingFrame, text="Owner:").grid(row=5, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][1]).grid(row=5, column=1)
+    tkinter.Label(buildingFrame, text="Number:").grid(row=6, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][3]).grid(row=6, column=1)
+    tkinter.Label(buildingFrame, text="Address:").grid(row=7, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][4]).grid(row=7, column=1)
+    tkinter.Label(buildingFrame, text="Coordinates:").grid(row=8, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][5]).grid(row=8, column=1)
+
+    # sqlCursor.execute(f"SELECT * FROM features WHERE buildingName = '{selectedBuilding}'")
+    tkinter.Label(buildingFrame, text="Floors:").grid(row=9, column=0)
+    buildingFloor = ttk.Entry(buildingFrame)
+    buildingFloor.grid(row=9, column=1)
+    tkinter.Label(buildingFrame, text="Square:").grid(row=10, column=0)
+    buildingSquare = ttk.Entry(buildingFrame)
+    buildingSquare.grid(row=10, column=1)
+    tkinter.Label(buildingFrame, text="Year:").grid(row=11, column=0)
+    buildingYear = ttk.Entry(buildingFrame)
+    buildingYear.grid(row=11, column=1)
+    tkinter.Label(buildingFrame, text="Zone:").grid(row=12, column=0)
+    buildingZone = ttk.Combobox(buildingFrame, state="readonly", values=["1", "2", "3", "4"])
+    buildingZone.grid(row=12, column=1)
+    tkinter.Label(buildingFrame, text="Type:").grid(row=13, column=0)
+    buildingType = ttk.Combobox(buildingFrame, state="readonly", values=["reinforced concrete", "masonry"])
+    buildingType.grid(row=13, column=1)
+    tkinter.Label(buildingFrame, text="Geometry:").grid(row=14, column=0)
+    buildingGeometry = ttk.Combobox(buildingFrame, state="readonly", values=["regular", "irregular"])
+    buildingGeometry.grid(row=14, column=1)
+    tkinter.Label(buildingFrame, text="Has Basement:").grid(row=15, column=0)
+    buildingBasement = ttk.Combobox(buildingFrame, state="readonly", values=["true", "false"])
+    buildingBasement.grid(row=15, column=1)
+    tkinter.Label(buildingFrame, text="Width (meter):").grid(row=16, column=0)
+    buildingWidth = ttk.Entry(buildingFrame)
+    buildingWidth.grid(row=16, column=1)
+    tkinter.Label(buildingFrame, text="Length (meter):").grid(row=17, column=0)
+    buildingLength = ttk.Entry(buildingFrame)
+    buildingLength.grid(row=17, column=1)
+    tkinter.Label(buildingFrame, text="Damaged:").grid(row=18, column=0)
+    buildingDamaged = ttk.Combobox(buildingFrame, state="readonly", values=["true", "false"])
+    buildingDamaged.grid(row=18, column=1)
+
+
+    def buildingSubmit():
+        floor = buildingFloor.get()
+        square = buildingSquare.get()
+        year = buildingYear.get()
+        zone = buildingZone.get()
+        type_ = buildingType.get()
+        geometry = buildingGeometry.get()
+        basement = buildingBasement.get()
+        width = buildingWidth.get()
+        length = buildingLength.get()
+        damaged = buildingDamaged.get()
+
+        if floor == "" or square == "" or year == "" or zone == "" or type_ == "" or geometry == "" or basement == "" \
+                or width == "" or length == "" or damaged == "":
+            errorPopUp("Please fill all of the elements.")
+            return
+        elif not floor.isdigit():
+            errorPopUp("Floor count should be numeric.")
+            return
+        elif not square.isdigit():
+            errorPopUp("Square should be numeric")
+            return
+        elif not year.isdigit():
+            errorPopUp("Year should be numeric")
+            return
+        elif not width.isdigit():
+            errorPopUp("Width should be numeric")
+            return
+        elif not length.isdigit():
+            errorPopUp("Length should be numeric")
+            return
+        else:
+            # calculating risk score
+            floor = int(floor)
+            square = int(square)
+            year = int(year)
+            zone = int(zone)
+            width = int(width)
+            length = int(length)
+
+            point = 100
+            if type_ == "reinforced concrete":
+                point += 30
+            else:
+                point -= 15
+
+            if 0 <= floor < 4:
+                point += 10
+            elif 4 <= floor < 7:
+                point += 5
+            else:
+                point -= 5
+
+            if 0 <= square < 100:
+                point += 5
+            else:
+                point -= 5
+
+            if year < 2000 and damaged == "true":
+                point -= 5
+            elif year >= 2000:
+                if damaged == "true":
+                    point -= 3
+                else:
+                    point += 5
+
+            point += zone
+
+            if geometry == "regular":
+                point += 10
+            else:
+                point -= 5
+
+            if basement == "true":
+                point -= 8
+            else:
+                point += 2
+
+            if width/length < 0.5:
+                point -= 3
+            else:
+                point += 3
+
+            sqlCursor.execute(f"""
+                INSERT INTO features VALUES ("{selectedBuilding}", {floor}, {square}, {year}, {zone}, "{type_}",
+                "{geometry}", "{basement}", {width}, {length}, "{damaged}", {point})
+                """)
+
+            successPopUp("Risk point has calculated and information is added to the database.")
+
+            # reset gui
+            # burada kaldım
+
+    ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
+
+
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
 
@@ -311,9 +457,16 @@ buildingFrame = tkinter.Frame(window)
 buildingFrame.grid(row=0, column=1)
 
 tkinter.Label(buildingFrame, text="Building Owner").grid(row=0, column=1)
-tkinter.Label(buildingFrame, text="Select Operation:   ").grid(row=1, column=0)
+tkinter.Label(buildingFrame, text="Select Building:   ").grid(row=1, column=0)
+sqlCursor.execute("SELECT name FROM building")
+buildingList = list()
+for building in sqlCursor:
+    buildingList.append(building[0])
+buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=buildingList)
+buildingSelectCombobox.grid(row=1, column=1)
 
-#sqlCursor.execute("SELECT ")
+ttk.Button(buildingFrame, text="OK", command=buildingSelectButtonFunc).grid(row=1, column=2)
+
 tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
 
 ownerFrame.mainloop()
