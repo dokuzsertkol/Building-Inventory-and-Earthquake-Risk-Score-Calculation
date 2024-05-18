@@ -24,7 +24,7 @@ def createTables():  # for creating tables
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
 
 
-createTables()
+createTables()  # if database does not exist
 
 
 def fillTables():  # for filling the tables
@@ -115,7 +115,7 @@ def resetBuildingFrame():
 def resetRiskFrame():
     for widget in riskFrame.winfo_children():
         widget.destroy()
-    tkinter.Label(riskFrame, text="Risk Scores").grid(row=0, column=0)
+    tkinter.Label(riskFrame, text="Other").grid(row=0, column=0)
     tkinter.Label(riskFrame, text="-----").grid(row=1, column=0)
 
     sqlCursor.execute("SELECT buildingName, risk, type, floors, year FROM features")
@@ -138,7 +138,7 @@ def resetRiskFrame():
             nameM.append(building[0])
             riskM.append(building[1])
             floorsM.append(building[3])
-    reinforcedFig = matplotlib.pyplot.figure(figsize=(4, 4))
+    reinforcedFig = matplotlib.pyplot.figure(figsize=(4, 4), dpi=70)
     for i in range(len(riskRC)):
         matplotlib.pyplot.bar(yearRC[i], riskRC[i], label=nameRC[i])
     reinforcedFig.legend()
@@ -149,7 +149,7 @@ def resetRiskFrame():
     reinforcedCanvas.draw()
     reinforcedCanvas.get_tk_widget().grid(row=2, column=0)
 
-    masonryFig = matplotlib.pyplot.figure(figsize=(4, 4))
+    masonryFig = matplotlib.pyplot.figure(figsize=(4, 4), dpi=70)
     for i in range(len(riskM)):
         matplotlib.pyplot.bar(floorsM[i], riskM[i], label=nameM[i])
     masonryFig.legend()
@@ -159,6 +159,77 @@ def resetRiskFrame():
     masonryCanvas = FigureCanvasTkAgg(masonryFig, master=riskFrame)
     masonryCanvas.draw()
     masonryCanvas.get_tk_widget().grid(row=3, column=0)
+
+
+def resetOtherFrame():
+    for widget in otherFrame.winfo_children():
+        widget.destroy()
+
+    tkinter.Label(otherFrame, text="Other").grid(row=0, column=1)
+    tkinter.Label(otherFrame, text="-----").grid(row=1, column=1)
+
+    # select owners with gender
+    tkinter.Label(otherFrame, text="Select Gender:").grid(row=2, column=0)
+    otherGender = ttk.Combobox(otherFrame, state="readonly", values=["male", "female", "other"])
+    otherGender.grid(row=2, column=1)
+    otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherGenderResult.grid(row=2, column=3)
+
+    def otherGenderButtonFunc():
+        nonlocal otherGenderResult
+        gender = otherGender.get()
+        sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner WHERE gender = '{gender}'")
+        ownerNamesGender = list()
+        for name_, surname_ in sqlCursor:
+            ownerNamesGender.append(name_ + " " + surname_)
+
+        otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesGender)
+        otherGenderResult.grid(row=2, column=3)
+    ttk.Button(otherFrame, text="OK", command=otherGenderButtonFunc).grid(row=2, column=2)
+
+    # select buildings with owner
+    tkinter.Label(otherFrame, text="Select Owner:").grid(row=3, column=0)
+    sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner")
+    ownerNames = list()
+    for name, surname in sqlCursor:
+        ownerNames.append(name + " " + surname)
+    otherOwner2Building = ttk.Combobox(otherFrame, state="readonly", values=ownerNames)
+    otherOwner2Building.grid(row=3, column=1)
+    otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherOwner2BuildingResult.grid(row=3, column=3)
+
+    def otherOwner2BuildingButtonFunc():
+        nonlocal otherOwner2BuildingResult
+        owner = otherOwner2Building.get()
+        sqlCursor.execute(f"SELECT name FROM building WHERE owner = '{owner}'")
+        buildingNames = list()
+        for building in sqlCursor:
+            buildingNames.append(building)
+
+        otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=buildingNames)
+        otherOwner2BuildingResult.grid(row=3, column=3)
+
+    ttk.Button(otherFrame, text="OK", command=otherOwner2BuildingButtonFunc).grid(row=3, column=2)
+
+    # select buildings with type
+    tkinter.Label(otherFrame, text="Select Type:").grid(row=4, column=0)
+    otherType = ttk.Combobox(otherFrame, state="readonly", values=["reinforced concrete", "masonry"])
+    otherType.grid(row=4, column=1)
+    otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherTypeResult.grid(row=4, column=3)
+
+    def otherGenderButtonFunc():
+        nonlocal otherTypeResult
+        type_ = otherType.get()
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE type = '{type_}'")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherTypeResult.grid(row=4, column=3)
+
+    ttk.Button(otherFrame, text="OK", command=otherGenderButtonFunc).grid(row=4, column=2)
 
 
 def successPopUp(message: str):
@@ -548,6 +619,12 @@ resetBuildingFrame()
 riskFrame = tkinter.Frame(window)
 riskFrame.grid(row=0, column=2)
 resetRiskFrame()
+
+# other part
+otherFrame = tkinter.Frame(window)
+otherFrame.grid(row=0, column=3)
+resetOtherFrame()
+
 
 ownerFrame.mainloop()
 
