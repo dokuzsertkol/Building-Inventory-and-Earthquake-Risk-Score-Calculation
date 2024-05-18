@@ -1,6 +1,8 @@
 import sqlite3
 import tkinter
 from tkinter import ttk
+import matplotlib.pyplot
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # sqlite database
 sqlConnection = sqlite3.connect("sqlDatabase.db")
@@ -20,6 +22,9 @@ def createTables():  # for creating tables
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS features(buildingName, floors, square, year, zone, type, geometry, "
                       "isBasement, width, length, damaged, risk);")  # building features table
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
+
+
+createTables()
 
 
 def fillTables():  # for filling the tables
@@ -57,6 +62,7 @@ def resetTables():
     fillTables()
     resetOwnerFrame()
     resetBuildingFrame()
+    resetRiskFrame()
 
 
 # GUI functions
@@ -81,7 +87,7 @@ def resetBuildingFrame():
     global buildingSelectCombobox
     for widget in buildingFrame.winfo_children():
         widget.destroy()
-    tkinter.Label(buildingFrame, text="Add Building Information").grid(row=0, column=1)
+    tkinter.Label(buildingFrame, text="Add Building Information to Calculate Risk Score").grid(row=0, column=1)
     tkinter.Label(buildingFrame, text="Select Building:   ").grid(row=1, column=0)
     sqlCursor.execute("SELECT name FROM building")
 
@@ -101,6 +107,58 @@ def resetBuildingFrame():
     ttk.Button(buildingFrame, text="OK", command=buildingSelectButtonFunc).grid(row=1, column=2)
 
     tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
+    tkinter.Label(buildingFrame, text="    |   ").grid(row=0, column=4)
+    tkinter.Label(buildingFrame, text="    |   ").grid(row=1, column=4)
+    tkinter.Label(buildingFrame, text="    |   ").grid(row=2, column=4)
+
+
+def resetRiskFrame():
+    for widget in riskFrame.winfo_children():
+        widget.destroy()
+    tkinter.Label(riskFrame, text="Risk Scores").grid(row=0, column=0)
+    tkinter.Label(riskFrame, text="-----").grid(row=1, column=0)
+
+    sqlCursor.execute("SELECT buildingName, risk, type, floors, year FROM features")
+    features = sqlCursor.fetchall()
+
+    nameRC = list()  # reinforced concrete
+    riskRC = list()
+    yearRC = list()
+
+    nameM = list()  # masonry
+    riskM = list()
+    floorsM = list()
+
+    for building in features:
+        if building[2] == "reinforced concrete":
+            nameRC.append(building[0])
+            riskRC.append(building[1])
+            yearRC.append(building[4])
+        else:  # masonry
+            nameM.append(building[0])
+            riskM.append(building[1])
+            floorsM.append(building[3])
+    reinforcedFig = matplotlib.pyplot.figure(figsize=(4, 4))
+    for i in range(len(riskRC)):
+        matplotlib.pyplot.bar(yearRC[i], riskRC[i], label=nameRC[i])
+    reinforcedFig.legend()
+    reinforcedFig.suptitle("Reinforced Concrete Buildings")
+    reinforcedFig.supxlabel("Year")
+    reinforcedFig.supylabel("Risk Score")
+    reinforcedCanvas = FigureCanvasTkAgg(reinforcedFig, master=riskFrame)
+    reinforcedCanvas.draw()
+    reinforcedCanvas.get_tk_widget().grid(row=2, column=0)
+
+    masonryFig = matplotlib.pyplot.figure(figsize=(4, 4))
+    for i in range(len(riskM)):
+        matplotlib.pyplot.bar(floorsM[i], riskM[i], label=nameM[i])
+    masonryFig.legend()
+    masonryFig.suptitle("Masonry Buildings")
+    masonryFig.supxlabel("Floor count")
+    masonryFig.supylabel("Risk Score")
+    masonryCanvas = FigureCanvasTkAgg(masonryFig, master=riskFrame)
+    masonryCanvas.draw()
+    masonryCanvas.get_tk_widget().grid(row=3, column=0)
 
 
 def successPopUp(message: str):
@@ -322,8 +380,8 @@ def buildingSelectButtonFunc():
     sqlCursor.execute(f"SELECT * FROM building WHERE name = '{selectedBuilding}'")
     buildingInfo = sqlCursor.fetchall()
 
-    tkinter.Label(buildingFrame, text="ID:").grid(row=4, column=0)
-    tkinter.Label(buildingFrame, text=buildingInfo[0][0]).grid(row=4, column=1)
+    tkinter.Label(buildingFrame, text="Name:").grid(row=4, column=0)
+    tkinter.Label(buildingFrame, text=buildingInfo[0][2]).grid(row=4, column=1)
     tkinter.Label(buildingFrame, text="Owner:").grid(row=5, column=0)
     tkinter.Label(buildingFrame, text=buildingInfo[0][1]).grid(row=5, column=1)
     tkinter.Label(buildingFrame, text="Number:").grid(row=6, column=0)
@@ -333,7 +391,7 @@ def buildingSelectButtonFunc():
     tkinter.Label(buildingFrame, text="Coordinates:").grid(row=8, column=0)
     tkinter.Label(buildingFrame, text=buildingInfo[0][5]).grid(row=8, column=1)
 
-    # sqlCursor.execute(f"SELECT * FROM features WHERE buildingName = '{selectedBuilding}'")
+    # code below can be improved so that already added info can be edited
     tkinter.Label(buildingFrame, text="Floors:").grid(row=9, column=0)
     buildingFloor = ttk.Entry(buildingFrame)
     buildingFloor.grid(row=9, column=1)
@@ -456,6 +514,7 @@ def buildingSelectButtonFunc():
                 """)
             sqlConnection.commit()
             resetBuildingFrame()
+            resetRiskFrame()
             successPopUp("Risk point has calculated and information is added to the database.")
 
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
@@ -485,9 +544,12 @@ buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=[]
 buildingSelectCombobox.grid(row=1, column=1)
 resetBuildingFrame()
 
+# building risk score part
+riskFrame = tkinter.Frame(window)
+riskFrame.grid(row=0, column=2)
+resetRiskFrame()
 
 ownerFrame.mainloop()
 
 sqlConnection.commit()
 sqlConnection.close()
-
