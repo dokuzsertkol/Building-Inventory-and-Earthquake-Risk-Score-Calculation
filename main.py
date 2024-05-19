@@ -144,10 +144,12 @@ def resetRiskFrame():
             nameM.append(building[0])
             riskM.append(building[1])
             floorsM.append(building[3])
+
     reinforcedFig = matplotlib.pyplot.figure(figsize=(4, 4), dpi=70)
-    for i in range(len(riskRC)):
-        matplotlib.pyplot.bar(yearRC[i], riskRC[i], label=nameRC[i])
-    reinforcedFig.legend()
+    if len(riskRC) > 0:
+        for i in range(len(riskRC)):
+            matplotlib.pyplot.bar(yearRC[i], riskRC[i], label=nameRC[i])
+        reinforcedFig.legend()
     reinforcedFig.suptitle("Reinforced Concrete Buildings")
     reinforcedFig.supxlabel("Year")
     reinforcedFig.supylabel("Risk Score")
@@ -156,9 +158,10 @@ def resetRiskFrame():
     reinforcedCanvas.get_tk_widget().grid(row=2, column=0)
 
     masonryFig = matplotlib.pyplot.figure(figsize=(4, 4), dpi=70)
-    for i in range(len(riskM)):
-        matplotlib.pyplot.bar(floorsM[i], riskM[i], label=nameM[i])
-    masonryFig.legend()
+    if len(riskM) > 0:
+        for i in range(len(riskM)):
+            matplotlib.pyplot.bar(floorsM[i], riskM[i], label=nameM[i])
+        masonryFig.legend()
     masonryFig.suptitle("Masonry Buildings")
     masonryFig.supxlabel("Floor count")
     masonryFig.supylabel("Risk Score")
@@ -539,14 +542,14 @@ def resetOtherFrame():
 def successPopUp(message: str):
     success = tkinter.Toplevel(ownerFrame)
     success.title("Done!")
-    success.geometry('300x40')
+    success.geometry('400x40')
     tkinter.Label(success, text=message).pack()
 
 
 def errorPopUp(errorMessage: str):
     error = tkinter.Toplevel(ownerFrame)
     error.title("Error!")
-    error.geometry('300x40')
+    error.geometry('400x40')
     tkinter.Label(error, text=errorMessage).pack()
 
 
