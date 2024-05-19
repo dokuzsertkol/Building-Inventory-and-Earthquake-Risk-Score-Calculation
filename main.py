@@ -509,15 +509,17 @@ def resetOtherFrame():
 
 
 def successPopUp(message: str):
-    top = tkinter.Toplevel(ownerFrame)
-    top.title("Done!")
-    tkinter.Label(top, text=message).grid(row=1, column=1)
+    success = tkinter.Toplevel(ownerFrame)
+    success.title("Done!")
+    success.geometry('300x40')
+    tkinter.Label(success, text=message).pack()
 
 
 def errorPopUp(errorMessage: str):
-    top = tkinter.Toplevel(ownerFrame)
-    top.title("Error!")
-    tkinter.Label(top, text=errorMessage).grid(row=1, column=1)
+    error = tkinter.Toplevel(ownerFrame)
+    error.title("Error!")
+    error.geometry('300x40')
+    tkinter.Label(error, text=errorMessage).pack()
 
 
 def ownerSelectButtonFunc():
@@ -874,6 +876,7 @@ def buildingSelectButtonFunc():
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
 
 
+# tkinter main window
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
 window.protocol("WM_DELETE_WINDOW", closingSection)
