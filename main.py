@@ -32,9 +32,6 @@ def createTables():  # for creating tables
     sqlCursor.execute("CREATE TABLE IF NOT EXISTS owner(no INTEGER PRIMARY KEY, ownerName, ownerSurname, gender, age);")  # owner table
 
 
-createTables()  # if database does not exist
-
-
 def fillTables():  # for filling the tables
     sqlCursor.execute("""
         INSERT INTO owner VALUES
@@ -193,8 +190,10 @@ def resetOtherFrame():
         ownerNamesGender = list()
         for name_, surname_ in sqlCursor:
             ownerNamesGender.append(name_ + " " + surname_)
-
-        otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesGender)
+        if len(ownerNamesGender) == 0:
+            otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesGender)
         otherGenderResult.grid(row=2, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherGenderButtonFunc).grid(row=2, column=2)
@@ -217,8 +216,10 @@ def resetOtherFrame():
         buildingNames = list()
         for building in sqlCursor:
             buildingNames.append(building)
-
-        otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=buildingNames)
+        if len(buildingNames) == 0:
+            otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=buildingNames)
         otherOwner2BuildingResult.grid(row=3, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherOwner2BuildingButtonFunc).grid(row=3, column=2)
@@ -237,8 +238,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherTypeResult.grid(row=4, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherTypeButtonFunc).grid(row=4, column=2)
@@ -257,8 +260,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherBasementResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherBasementResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherBasementResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherBasementResult.grid(row=5, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherBasementButtonFunc).grid(row=5, column=2)
@@ -277,8 +282,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherDamagedResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherDamagedResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherDamagedResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherDamagedResult.grid(row=6, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherDamagedButtonFunc).grid(row=6, column=2)
@@ -297,8 +304,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherGeometryResult.grid(row=7, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherGeometryButtonFunc).grid(row=7, column=2)
@@ -317,8 +326,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherZoneResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherZoneResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherZoneResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherZoneResult.grid(row=8, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherZoneButtonFunc).grid(row=8, column=2)
@@ -340,8 +351,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherRiskLowerResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherRiskLowerResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherRiskLowerResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherRiskLowerResult.grid(row=9, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherRiskLowerButtonFunc).grid(row=9, column=2)
@@ -363,8 +376,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherRiskHigherResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherRiskHigherResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherRiskHigherResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherRiskHigherResult.grid(row=10, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherRiskHigherButtonFunc).grid(row=10, column=2)
@@ -386,8 +401,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherYearBeforeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherYearBeforeResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherYearBeforeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherYearBeforeResult.grid(row=11, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherYearBeforeButtonFunc).grid(row=11, column=2)
@@ -409,8 +426,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherYearAfterResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherYearAfterResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherYearAfterResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherYearAfterResult.grid(row=12, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherYearAfterButtonFunc).grid(row=12, column=2)
@@ -432,8 +451,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherFloorLessResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherFloorLessResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherFloorLessResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherFloorLessResult.grid(row=13, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherFloorLessButtonFunc).grid(row=13, column=2)
@@ -455,8 +476,10 @@ def resetOtherFrame():
         buildings = list()
         for building in sqlCursor:
             buildings.append(building)
-
-        otherFloorMoreResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        if len(buildings) == 0:
+            otherFloorMoreResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherFloorMoreResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherFloorMoreResult.grid(row=14, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherFloorMoreButtonFunc).grid(row=14, column=2)
@@ -478,8 +501,10 @@ def resetOtherFrame():
         ownerNamesYounger = list()
         for name_, surname_ in sqlCursor:
             ownerNamesYounger.append(name_ + " " + surname_)
-
-        otherOwnerYoungerResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesYounger)
+        if len(ownerNamesYounger) == 0:
+            otherOwnerYoungerResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherOwnerYoungerResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesYounger)
         otherOwnerYoungerResult.grid(row=15, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherOwnerYoungerButtonFunc).grid(row=15, column=2)
@@ -501,13 +526,16 @@ def resetOtherFrame():
         ownerNamesOlder = list()
         for name_, surname_ in sqlCursor:
             ownerNamesOlder.append(name_ + " " + surname_)
-
-        otherOwnerOlderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesOlder)
+        if len(ownerNamesOlder) == 0:
+            otherOwnerOlderResult = ttk.Combobox(otherFrame, state="readonly", values=["<No Suitable Data>"])
+        else:
+            otherOwnerOlderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesOlder)
         otherOwnerOlderResult.grid(row=16, column=3)
 
     ttk.Button(otherFrame, text="LIST", command=otherOwnerOlderButtonFunc).grid(row=16, column=2)
 
 
+# pop up notifications
 def successPopUp(message: str):
     success = tkinter.Toplevel(ownerFrame)
     success.title("Done!")
@@ -522,6 +550,7 @@ def errorPopUp(errorMessage: str):
     tkinter.Label(error, text=errorMessage).pack()
 
 
+# algorithms
 def ownerSelectButtonFunc():
     selectedOperation = ownerSelectCombobox.get()
     resetOwnerFrame()
@@ -876,6 +905,8 @@ def buildingSelectButtonFunc():
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
 
 
+createTables()  # if database does not exist
+
 # tkinter main window
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
@@ -913,5 +944,3 @@ otherFrame.grid(row=0, column=3)
 resetOtherFrame()
 
 window.mainloop()
-
-
