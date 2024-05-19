@@ -9,6 +9,14 @@ sqlConnection = sqlite3.connect("sqlDatabase.db")
 sqlCursor = sqlConnection.cursor()
 
 
+# tkinter closing section
+def closingSection():
+    window.quit()  # stops mainloop
+    window.destroy()  # this is necessary on Windows to prevent Fatal Python Error: PyEval_RestoreThread: NULL tstate
+    sqlConnection.commit()
+    sqlConnection.close()
+
+
 # database functions
 def dropTables():
     sqlCursor.execute("DROP TABLE IF EXISTS owner")
@@ -63,6 +71,7 @@ def resetTables():
     resetOwnerFrame()
     resetBuildingFrame()
     resetRiskFrame()
+    resetOtherFrame()
 
 
 # GUI functions
@@ -163,6 +172,7 @@ def resetRiskFrame():
 
 def resetOtherFrame():
     # the code below can be shortened so much
+
     for widget in otherFrame.winfo_children():
         widget.destroy()
 
@@ -170,7 +180,7 @@ def resetOtherFrame():
     tkinter.Label(otherFrame, text="-----").grid(row=1, column=1, columnspan=2)
 
     # select owners by gender
-    tkinter.Label(otherFrame, text="Select Gender:").grid(row=2, column=0)
+    tkinter.Label(otherFrame, text="Owner by Gender:").grid(row=2, column=0)
     otherGender = ttk.Combobox(otherFrame, state="readonly", values=["male", "female", "other"])
     otherGender.grid(row=2, column=1)
     otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=[])
@@ -190,7 +200,7 @@ def resetOtherFrame():
     ttk.Button(otherFrame, text="LIST", command=otherGenderButtonFunc).grid(row=2, column=2)
 
     # select buildings by owner
-    tkinter.Label(otherFrame, text="Select Owner:").grid(row=3, column=0)
+    tkinter.Label(otherFrame, text="Owned by:").grid(row=3, column=0)
     sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner")
     ownerNames = list()
     for name, surname in sqlCursor:
@@ -214,7 +224,7 @@ def resetOtherFrame():
     ttk.Button(otherFrame, text="LIST", command=otherOwner2BuildingButtonFunc).grid(row=3, column=2)
 
     # select buildings by type
-    tkinter.Label(otherFrame, text="Select Type:").grid(row=4, column=0)
+    tkinter.Label(otherFrame, text="Building by Type:").grid(row=4, column=0)
     otherType = ttk.Combobox(otherFrame, state="readonly", values=["reinforced concrete", "masonry"])
     otherType.grid(row=4, column=1)
     otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=[])
@@ -274,7 +284,7 @@ def resetOtherFrame():
     ttk.Button(otherFrame, text="LIST", command=otherDamagedButtonFunc).grid(row=6, column=2)
 
     # select building by geometry
-    tkinter.Label(otherFrame, text="Select Geometry:").grid(row=7, column=0)
+    tkinter.Label(otherFrame, text="Building by Geometry:").grid(row=7, column=0)
     otherGeometry = ttk.Combobox(otherFrame, state="readonly", values=["regular", "irregular"])
     otherGeometry.grid(row=7, column=1)
     otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=[])
@@ -498,7 +508,6 @@ def resetOtherFrame():
     ttk.Button(otherFrame, text="LIST", command=otherOwnerOlderButtonFunc).grid(row=16, column=2)
 
 
-
 def successPopUp(message: str):
     top = tkinter.Toplevel(ownerFrame)
     top.title("Done!")
@@ -535,6 +544,7 @@ def ownerSelectButtonFunc():
                     """)
                 sqlConnection.commit()
                 resetOwnerFrame()
+                resetOtherFrame()
                 successPopUp("New owner is added.")
 
 
@@ -627,11 +637,15 @@ def ownerSelectButtonFunc():
                                         gender = "{inputGender}", age = {inputAge} WHERE ownerName =
                                         "{ownerInformation[0][1]}" AND ownerSurname = "{ownerInformation[0][2]}"
                                     """)
+                    newOwnerName = inputName + " " + inputSurname
+                    oldOwnerName = ownerInformation[0][1] + " " + ownerInformation[0][2]
+                    sqlCursor.execute(f"""
+                                    UPDATE building SET owner = "{newOwnerName}" WHERE owner = "{oldOwnerName}"
+                                    """)
                     sqlConnection.commit()
                     resetOwnerFrame()
+                    resetOtherFrame()
                     successPopUp("Owner information is updated.")
-
-
 
             ownerEditSubmitButton = ttk.Button(ownerFrame, text="Submit", command=ownerEditSubmitButtonFunc)
             ownerEditSubmitButton.grid(row=7, column=2)
@@ -660,6 +674,7 @@ def ownerSelectButtonFunc():
 
             sqlConnection.commit()
             resetOwnerFrame()
+            resetOtherFrame()
             successPopUp("Selected owner is deleted.")
 
 
@@ -853,6 +868,7 @@ def buildingSelectButtonFunc():
             sqlConnection.commit()
             resetBuildingFrame()
             resetRiskFrame()
+            resetOtherFrame()
             successPopUp("Risk point has calculated and information is added to the database.")
 
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
@@ -860,6 +876,7 @@ def buildingSelectButtonFunc():
 
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
+window.protocol("WM_DELETE_WINDOW", closingSection)
 
 # menu
 menu = tkinter.Menu(window)
@@ -892,8 +909,6 @@ otherFrame = tkinter.Frame(window)
 otherFrame.grid(row=0, column=3)
 resetOtherFrame()
 
+window.mainloop()
 
-ownerFrame.mainloop()
 
-sqlConnection.commit()
-sqlConnection.close()
