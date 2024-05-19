@@ -115,7 +115,7 @@ def resetBuildingFrame():
 def resetRiskFrame():
     for widget in riskFrame.winfo_children():
         widget.destroy()
-    tkinter.Label(riskFrame, text="Other").grid(row=0, column=0)
+    tkinter.Label(riskFrame, text="Risk Score").grid(row=0, column=0)
     tkinter.Label(riskFrame, text="-----").grid(row=1, column=0)
 
     sqlCursor.execute("SELECT buildingName, risk, type, floors, year FROM features")
@@ -162,13 +162,14 @@ def resetRiskFrame():
 
 
 def resetOtherFrame():
+    # the code below can be shortened so much
     for widget in otherFrame.winfo_children():
         widget.destroy()
 
-    tkinter.Label(otherFrame, text="Other").grid(row=0, column=1)
-    tkinter.Label(otherFrame, text="-----").grid(row=1, column=1)
+    tkinter.Label(otherFrame, text="Other").grid(row=0, column=1, columnspan=2)
+    tkinter.Label(otherFrame, text="-----").grid(row=1, column=1, columnspan=2)
 
-    # select owners with gender
+    # select owners by gender
     tkinter.Label(otherFrame, text="Select Gender:").grid(row=2, column=0)
     otherGender = ttk.Combobox(otherFrame, state="readonly", values=["male", "female", "other"])
     otherGender.grid(row=2, column=1)
@@ -185,9 +186,10 @@ def resetOtherFrame():
 
         otherGenderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesGender)
         otherGenderResult.grid(row=2, column=3)
-    ttk.Button(otherFrame, text="OK", command=otherGenderButtonFunc).grid(row=2, column=2)
 
-    # select buildings with owner
+    ttk.Button(otherFrame, text="LIST", command=otherGenderButtonFunc).grid(row=2, column=2)
+
+    # select buildings by owner
     tkinter.Label(otherFrame, text="Select Owner:").grid(row=3, column=0)
     sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner")
     ownerNames = list()
@@ -209,16 +211,16 @@ def resetOtherFrame():
         otherOwner2BuildingResult = ttk.Combobox(otherFrame, state="readonly", values=buildingNames)
         otherOwner2BuildingResult.grid(row=3, column=3)
 
-    ttk.Button(otherFrame, text="OK", command=otherOwner2BuildingButtonFunc).grid(row=3, column=2)
+    ttk.Button(otherFrame, text="LIST", command=otherOwner2BuildingButtonFunc).grid(row=3, column=2)
 
-    # select buildings with type
+    # select buildings by type
     tkinter.Label(otherFrame, text="Select Type:").grid(row=4, column=0)
     otherType = ttk.Combobox(otherFrame, state="readonly", values=["reinforced concrete", "masonry"])
     otherType.grid(row=4, column=1)
     otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=[])
     otherTypeResult.grid(row=4, column=3)
 
-    def otherGenderButtonFunc():
+    def otherTypeButtonFunc():
         nonlocal otherTypeResult
         type_ = otherType.get()
         sqlCursor.execute(f"SELECT buildingName FROM features WHERE type = '{type_}'")
@@ -229,7 +231,272 @@ def resetOtherFrame():
         otherTypeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
         otherTypeResult.grid(row=4, column=3)
 
-    ttk.Button(otherFrame, text="OK", command=otherGenderButtonFunc).grid(row=4, column=2)
+    ttk.Button(otherFrame, text="LIST", command=otherTypeButtonFunc).grid(row=4, column=2)
+
+    # select buildings by basement
+    tkinter.Label(otherFrame, text="Has Basement:").grid(row=5, column=0)
+    otherBasement = ttk.Combobox(otherFrame, state="readonly", values=["true", "false"])
+    otherBasement.grid(row=5, column=1)
+    otherBasementResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherBasementResult.grid(row=5, column=3)
+
+    def otherBasementButtonFunc():
+        nonlocal otherBasementResult
+        basement = otherBasement.get()
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE isBasement = '{basement}'")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherBasementResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherBasementResult.grid(row=5, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherBasementButtonFunc).grid(row=5, column=2)
+
+    # select building by damaged
+    tkinter.Label(otherFrame, text="Is Damaged:").grid(row=6, column=0)
+    otherDamaged = ttk.Combobox(otherFrame, state="readonly", values=["true", "false"])
+    otherDamaged.grid(row=6, column=1)
+    otherDamagedResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherDamagedResult.grid(row=6, column=3)
+
+    def otherDamagedButtonFunc():
+        nonlocal otherDamagedResult
+        damaged = otherDamaged.get()
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE damaged = '{damaged}'")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherDamagedResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherDamagedResult.grid(row=6, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherDamagedButtonFunc).grid(row=6, column=2)
+
+    # select building by geometry
+    tkinter.Label(otherFrame, text="Select Geometry:").grid(row=7, column=0)
+    otherGeometry = ttk.Combobox(otherFrame, state="readonly", values=["regular", "irregular"])
+    otherGeometry.grid(row=7, column=1)
+    otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherGeometryResult.grid(row=7, column=3)
+
+    def otherGeometryButtonFunc():
+        nonlocal otherGeometryResult
+        geometry = otherGeometry.get()
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE geometry = '{geometry}'")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherGeometryResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherGeometryResult.grid(row=7, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherGeometryButtonFunc).grid(row=7, column=2)
+
+    # select building by zone
+    tkinter.Label(otherFrame, text="Select Zone:").grid(row=8, column=0)
+    otherZone = ttk.Combobox(otherFrame, state="readonly", values=["1", "2", "3", "4"])
+    otherZone.grid(row=8, column=1)
+    otherZoneResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherZoneResult.grid(row=8, column=3)
+
+    def otherZoneButtonFunc():
+        nonlocal otherZoneResult
+        zone = otherZone.get()
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE zone = {zone}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherZoneResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherZoneResult.grid(row=8, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherZoneButtonFunc).grid(row=8, column=2)
+
+    # select building by risk score (lower than)
+    tkinter.Label(otherFrame, text="Risk Lower Than:").grid(row=9, column=0)
+    otherRiskLower = ttk.Entry(otherFrame)
+    otherRiskLower.grid(row=9, column=1)
+    otherRiskLowerResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherRiskLowerResult.grid(row=9, column=3)
+
+    def otherRiskLowerButtonFunc():
+        nonlocal otherRiskLowerResult
+        riskLower = otherRiskLower.get()
+        if not riskLower.isdigit():
+            errorPopUp("Risk Score should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE risk < {riskLower}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherRiskLowerResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherRiskLowerResult.grid(row=9, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherRiskLowerButtonFunc).grid(row=9, column=2)
+
+    # select building by risk score (higher than)
+    tkinter.Label(otherFrame, text="Risk Higher Than:").grid(row=10, column=0)
+    otherRiskHigher = ttk.Entry(otherFrame)
+    otherRiskHigher.grid(row=10, column=1)
+    otherRiskHigherResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherRiskHigherResult.grid(row=10, column=3)
+
+    def otherRiskHigherButtonFunc():
+        nonlocal otherRiskHigherResult
+        riskHigher = otherRiskHigher.get()
+        if not riskHigher.isdigit():
+            errorPopUp("Risk Score should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE risk > {riskHigher}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherRiskHigherResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherRiskHigherResult.grid(row=10, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherRiskHigherButtonFunc).grid(row=10, column=2)
+
+    # select building by year (before)
+    tkinter.Label(otherFrame, text="Year Before:").grid(row=11, column=0)
+    otherYearBefore = ttk.Entry(otherFrame)
+    otherYearBefore.grid(row=11, column=1)
+    otherYearBeforeResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherYearBeforeResult.grid(row=11, column=3)
+
+    def otherYearBeforeButtonFunc():
+        nonlocal otherYearBeforeResult
+        yearBefore = otherYearBefore.get()
+        if not yearBefore.isdigit():
+            errorPopUp("Year should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE year < {yearBefore}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherYearBeforeResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherYearBeforeResult.grid(row=11, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherYearBeforeButtonFunc).grid(row=11, column=2)
+
+    # select building by year (after)
+    tkinter.Label(otherFrame, text="Year After:").grid(row=12, column=0)
+    otherYearAfter = ttk.Entry(otherFrame)
+    otherYearAfter.grid(row=12, column=1)
+    otherYearAfterResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherYearAfterResult.grid(row=12, column=3)
+
+    def otherYearAfterButtonFunc():
+        nonlocal otherYearAfterResult
+        yearAfter = otherYearAfter.get()
+        if not yearAfter.isdigit():
+            errorPopUp("Year should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE year > {yearAfter}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherYearAfterResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherYearAfterResult.grid(row=12, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherYearAfterButtonFunc).grid(row=12, column=2)
+
+    # select building by floor count (less than)
+    tkinter.Label(otherFrame, text="Floor Less Than:").grid(row=13, column=0)
+    otherFloorLess = ttk.Entry(otherFrame)
+    otherFloorLess.grid(row=13, column=1)
+    otherFloorLessResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherFloorLessResult.grid(row=13, column=3)
+
+    def otherFloorLessButtonFunc():
+        nonlocal otherFloorLessResult
+        floorLess = otherFloorLess.get()
+        if not floorLess.isdigit():
+            errorPopUp("Floor count should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE floors < {floorLess}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherFloorLessResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherFloorLessResult.grid(row=13, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherFloorLessButtonFunc).grid(row=13, column=2)
+
+    # select building by risk score (higher than)
+    tkinter.Label(otherFrame, text="Floor More Than:").grid(row=14, column=0)
+    otherFloorMore = ttk.Entry(otherFrame)
+    otherFloorMore.grid(row=14, column=1)
+    otherFloorMoreResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherFloorMoreResult.grid(row=14, column=3)
+
+    def otherFloorMoreButtonFunc():
+        nonlocal otherFloorMoreResult
+        floorMore = otherFloorMore.get()
+        if not floorMore.isdigit():
+            errorPopUp("Floor count should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT buildingName FROM features WHERE floors > {floorMore}")
+        buildings = list()
+        for building in sqlCursor:
+            buildings.append(building)
+
+        otherFloorMoreResult = ttk.Combobox(otherFrame, state="readonly", values=buildings)
+        otherFloorMoreResult.grid(row=14, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherFloorMoreButtonFunc).grid(row=14, column=2)
+
+    # select owners by age (younger than)
+    tkinter.Label(otherFrame, text="Owner Younger Than:").grid(row=15, column=0)
+    otherOwnerYounger = ttk.Entry(otherFrame)
+    otherOwnerYounger.grid(row=15, column=1)
+    otherOwnerYoungerResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherOwnerYoungerResult.grid(row=15, column=3)
+
+    def otherOwnerYoungerButtonFunc():
+        nonlocal otherOwnerYoungerResult
+        ownerYounger = otherOwnerYounger.get()
+        if not ownerYounger.isdigit():
+            errorPopUp("Age should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner WHERE age < {ownerYounger}")
+        ownerNamesYounger = list()
+        for name_, surname_ in sqlCursor:
+            ownerNamesYounger.append(name_ + " " + surname_)
+
+        otherOwnerYoungerResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesYounger)
+        otherOwnerYoungerResult.grid(row=15, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherOwnerYoungerButtonFunc).grid(row=15, column=2)
+
+    # select owners by age (older than)
+    tkinter.Label(otherFrame, text="Owner Older Than:").grid(row=16, column=0)
+    otherOwnerOlder = ttk.Entry(otherFrame)
+    otherOwnerOlder.grid(row=16, column=1)
+    otherOwnerOlderResult = ttk.Combobox(otherFrame, state="readonly", values=[])
+    otherOwnerOlderResult.grid(row=16, column=3)
+
+    def otherOwnerOlderButtonFunc():
+        nonlocal otherOwnerOlderResult
+        ownerOlder = otherOwnerOlder.get()
+        if not ownerOlder.isdigit():
+            errorPopUp("Age should be numeric.")
+            return
+        sqlCursor.execute(f"SELECT ownerName, ownerSurname FROM owner WHERE age > {ownerOlder}")
+        ownerNamesOlder = list()
+        for name_, surname_ in sqlCursor:
+            ownerNamesOlder.append(name_ + " " + surname_)
+
+        otherOwnerOlderResult = ttk.Combobox(otherFrame, state="readonly", values=ownerNamesOlder)
+        otherOwnerOlderResult.grid(row=16, column=3)
+
+    ttk.Button(otherFrame, text="LIST", command=otherOwnerOlderButtonFunc).grid(row=16, column=2)
+
 
 
 def successPopUp(message: str):
