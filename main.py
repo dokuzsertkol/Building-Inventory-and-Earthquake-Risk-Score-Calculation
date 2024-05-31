@@ -65,34 +65,72 @@ def resetTables():
     dropTables()
     createTables()
     fillTables()
-    resetOwnerFrame()
-    resetBuildingFrame()
-    resetRiskFrame()
-    resetOtherFrame()
+    successPopUp("The database is reset to its initial state.")
 
 
 # GUI functions
-def resetOwnerFrame():
-    global ownerSelectCombobox
-    for widget in ownerFrame.winfo_children():
+def setMainFrame():
+    global mainFrame
+    mainFrame = ttk.Frame(window)
+    mainFrame.grid(row=0, column=0)
+
+    tkinter.Label(mainFrame, text="Select Operation").grid(row=0, column=0)
+    tkinter.Label(mainFrame, text="--------").grid(row=1, column=0)
+    ttk.Button(mainFrame, text="Owner Operations", command=resetOwnerFrame).grid(row=2, column=0)
+    ttk.Button(mainFrame, text="Add Building Information", command=resetBuildingFrame).grid(row=3, column=0)
+    ttk.Button(mainFrame, text="Display Risk Score Graphics", command=resetRiskFrame).grid(row=4, column=0)
+    ttk.Button(mainFrame, text="Other Query Operations", command=resetOtherFrame).grid(row=5, column=0)
+    tkinter.Label(mainFrame, text="--------").grid(row=6, column=0)
+    ttk.Button(mainFrame, text="Reset Database", command=resetTables).grid(row=7, column=0)
+
+
+def deleteFrames():
+    for widget in window.winfo_children():
         widget.destroy()
+
+
+def setBackFrame():
+    global backFrame
+    backFrame = ttk.Frame(window)
+    backFrame.grid(row=1, column=0)
+
+    tkinter.Label(backFrame, text="--------").grid(row=0, column=0)
+    ttk.Button(backFrame, text="Back", command=getBack2Main).grid(row=1, column=0)
+
+
+def getBack2Main():
+    deleteFrames()
+    setMainFrame()
+
+
+def resetOwnerFrame():
+    deleteFrames()
+
+    global ownerFrame
+    global ownerSelectCombobox
+    ownerFrame = ttk.Frame(window)
+    ownerFrame.grid(row=0, column=0)
+
+    setBackFrame()
+
     tkinter.Label(ownerFrame, text="Building Owner").grid(row=0, column=1)
     tkinter.Label(ownerFrame, text="Select Operation:   ").grid(row=1, column=0)
     ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly",
                                        values=["Add", "Edit", "Delete", "List Information"])
     ownerSelectCombobox.grid(row=1, column=1)
     ttk.Button(ownerFrame, text="OK", command=ownerSelectButtonFunc).grid(row=1, column=2)
-    tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
-    tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
-    tkinter.Label(ownerFrame, text="    |   ").grid(row=0, column=4)
-    tkinter.Label(ownerFrame, text="    |   ").grid(row=1, column=4)
-    tkinter.Label(ownerFrame, text="    |   ").grid(row=2, column=4)
 
 
 def resetBuildingFrame():
+    deleteFrames()
+
+    global buildingFrame
     global buildingSelectCombobox
-    for widget in buildingFrame.winfo_children():
-        widget.destroy()
+    buildingFrame = ttk.Frame(window)
+    buildingFrame.grid(row=0, column=0)
+
+    setBackFrame()
+
     tkinter.Label(buildingFrame, text="Add Building Information to Calculate Risk Score").grid(row=0, column=1)
     tkinter.Label(buildingFrame, text="Select Building:   ").grid(row=1, column=0)
     sqlCursor.execute("SELECT name FROM building")
@@ -112,15 +150,16 @@ def resetBuildingFrame():
 
     ttk.Button(buildingFrame, text="OK", command=buildingSelectButtonFunc).grid(row=1, column=2)
 
-    tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
-    tkinter.Label(buildingFrame, text="    |   ").grid(row=0, column=4)
-    tkinter.Label(buildingFrame, text="    |   ").grid(row=1, column=4)
-    tkinter.Label(buildingFrame, text="    |   ").grid(row=2, column=4)
-
 
 def resetRiskFrame():
-    for widget in riskFrame.winfo_children():
-        widget.destroy()
+    deleteFrames()
+
+    global riskFrame
+    riskFrame = ttk.Frame(window)
+    riskFrame.grid(row=0, column=0)
+
+    setBackFrame()
+
     tkinter.Label(riskFrame, text="Risk Score").grid(row=0, column=0)
     tkinter.Label(riskFrame, text="-----").grid(row=1, column=0)
 
@@ -173,8 +212,13 @@ def resetRiskFrame():
 def resetOtherFrame():
     # the code below can be shortened so much
 
-    for widget in otherFrame.winfo_children():
-        widget.destroy()
+    deleteFrames()
+
+    global otherFrame
+    otherFrame = ttk.Frame(window)
+    otherFrame.grid(row=0, column=0)
+
+    setBackFrame()
 
     tkinter.Label(otherFrame, text="Other").grid(row=0, column=1, columnspan=2)
     tkinter.Label(otherFrame, text="-----").grid(row=1, column=1, columnspan=2)
@@ -540,14 +584,14 @@ def resetOtherFrame():
 
 # pop up notifications
 def successPopUp(message: str):
-    success = tkinter.Toplevel(ownerFrame)
+    success = tkinter.Toplevel(window)
     success.title("Done!")
     success.geometry('400x40')
     tkinter.Label(success, text=message).pack()
 
 
 def errorPopUp(errorMessage: str):
-    error = tkinter.Toplevel(ownerFrame)
+    error = tkinter.Toplevel(window)
     error.title("Error!")
     error.geometry('400x40')
     tkinter.Label(error, text=errorMessage).pack()
@@ -557,6 +601,8 @@ def errorPopUp(errorMessage: str):
 def ownerSelectButtonFunc():
     selectedOperation = ownerSelectCombobox.get()
     resetOwnerFrame()
+
+    tkinter.Label(ownerFrame, text="--------").grid(row=2, column=1)
 
     if selectedOperation == "Add":
         def ownerAddButtonFunc():
@@ -577,8 +623,7 @@ def ownerSelectButtonFunc():
                     ("{inputName}", "{inputSurname}", "{inputGender}", {inputAge})
                     """)
                 sqlConnection.commit()
-                resetOwnerFrame()
-                resetOtherFrame()
+                getBack2Main()
                 successPopUp("New owner is added.")
 
 
@@ -677,8 +722,7 @@ def ownerSelectButtonFunc():
                                     UPDATE building SET owner = "{newOwnerName}" WHERE owner = "{oldOwnerName}"
                                     """)
                     sqlConnection.commit()
-                    resetOwnerFrame()
-                    resetOtherFrame()
+                    getBack2Main()
                     successPopUp("Owner information is updated.")
 
             ownerEditSubmitButton = ttk.Button(ownerFrame, text="Submit", command=ownerEditSubmitButtonFunc)
@@ -707,8 +751,7 @@ def ownerSelectButtonFunc():
             sqlCursor.execute(f"UPDATE building SET owner = '<No Owner>' WHERE owner = '{selectedOwner}'")
 
             sqlConnection.commit()
-            resetOwnerFrame()
-            resetOtherFrame()
+            getBack2Main()
             successPopUp("Selected owner is deleted.")
 
 
@@ -762,8 +805,8 @@ def buildingSelectButtonFunc():
     selectedBuilding = buildingSelectCombobox.get()
     if selectedBuilding == "":
         return
-
     resetBuildingFrame()
+    tkinter.Label(buildingFrame, text="--------").grid(row=2, column=1)
     sqlCursor.execute(f"SELECT * FROM building WHERE name = '{selectedBuilding}'")
     buildingInfo = sqlCursor.fetchall()
 
@@ -843,7 +886,6 @@ def buildingSelectButtonFunc():
             errorPopUp("Length should be numeric")
             return
         else:
-            resetBuildingFrame()
             # calculating risk score
             floor = int(floor)
             square = int(square)
@@ -878,7 +920,7 @@ def buildingSelectButtonFunc():
                 else:
                     point += 5
 
-            point += zone
+            point += zone * 5
 
             if geometry == "regular":
                 point += 10
@@ -900,9 +942,7 @@ def buildingSelectButtonFunc():
                 "{geometry}", "{basement}", {width}, {length}, "{damaged}", {point})
                 """)
             sqlConnection.commit()
-            resetBuildingFrame()
-            resetRiskFrame()
-            resetOtherFrame()
+            getBack2Main()
             successPopUp("Risk point has calculated and information is added to the database.")
 
     ttk.Button(buildingFrame, text="Submit", command=buildingSubmit).grid(row=18, column=2)
@@ -914,36 +954,25 @@ createTables()  # if database does not exist
 window = tkinter.Tk()
 window.title("Building Inventory and Earthquake Risk Score Calculation")
 window.protocol("WM_DELETE_WINDOW", closingSection)
+# window.geometry("500x650")
 
-# menu
-menu = tkinter.Menu(window)
-window.config(menu=menu)
-databaseMenu = tkinter.Menu(menu)
-menu.add_cascade(label="Database", menu=databaseMenu)
-databaseMenu.add_command(label='Reset Database to Initial State', command=resetTables)
+# main menu part
+mainFrame = tkinter.Frame(window)
+setMainFrame()
 
 # building owner part
 ownerFrame = tkinter.Frame(window)
 ownerFrame.grid(row=0, column=0)
 ownerSelectCombobox = ttk.Combobox(ownerFrame, state="readonly", values=["Add", "Edit", "Delete", "List Information"])
-ownerSelectCombobox.grid(row=1, column=1)
-resetOwnerFrame()
 
 # building information part
 buildingFrame = tkinter.Frame(window)
-buildingFrame.grid(row=0, column=1)
+buildingFrame.grid(row=0, column=0)
 buildingSelectCombobox = ttk.Combobox(buildingFrame, state="readonly", values=[])
-buildingSelectCombobox.grid(row=1, column=1)
-resetBuildingFrame()
 
-# building risk score part
-riskFrame = tkinter.Frame(window)
-riskFrame.grid(row=0, column=2)
-resetRiskFrame()
+# back to main menu
+backFrame = tkinter.Frame(window)
+backFrame.grid(row=1, column=0)
 
-# other part
-otherFrame = tkinter.Frame(window)
-otherFrame.grid(row=0, column=3)
-resetOtherFrame()
 
 window.mainloop()
