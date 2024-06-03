@@ -2,7 +2,7 @@
  
 Final Project for the lecture Scripting Languages.
 
-Calculates the risk score of a building with its given features using the algorithm the instructor provided.
+Calculates the risk score of a building with user supplied features using the algorithm the instructor provided.
 
 The project was written in Python using SQLite for database operations and Tkinter for GUI.
 
